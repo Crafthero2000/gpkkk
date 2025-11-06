@@ -1,13 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Моя PWA на GitHub Pages</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#317EFB"/>
+  <style>
+    body { font-family: sans-serif; text-align: center; margin-top: 50px; }
+    button { padding: 10px 20px; font-size: 16px; }
+  </style>
 </head>
 <body>
+  <h1>Привет из PWA!</h1>
+  <p>Эта страница работает офлайн 💪</p>
+  <button onclick="alert('Работает!')">Нажми</button>
 
-  <h1>Template</h1>
-  
-  <p>This is a blank template for a web page.</p>
-  
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .then(() => console.log('✅ Service Worker зарегистрирован'))
+        .catch(err => console.log('⚠️ Ошибка регистрации SW:', err));
+    }
+  </script>
 </body>
 </html>
