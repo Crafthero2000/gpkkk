@@ -1,7 +1,7 @@
 {
   "name": "Моя PWA на GitHub Pages",
   "short_name": "MyPWA",
-  "start_url": "./notepad",
+  "start_url": ".",
   "display": "minimal-ui",
   "background_color": "#ffffff",
   "theme_color": "#317EFB",
