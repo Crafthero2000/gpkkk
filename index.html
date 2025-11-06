@@ -14,7 +14,7 @@
 <body>
   <h1>Привет из PWA!</h1>
   <p>Эта страница работает офлайн 💪</p>
-  <button onclick="alert('Работает!')">Нажми</button>
+  <button id="ntf">Нажми</button>
 
   <script>
     let swRegistration = null;
@@ -36,11 +36,14 @@
   setTimeout(randomNotification, 30000);
 }
 
-    Notification.requestPermission().then((result) => {
+    const button = document.getElementById("ntf");
+button.addEventListener("click", () => {
+  Notification.requestPermission().then((result) => {
     if (result === "granted") {
       randomNotification();
     }
   });
+});
   </script>
 </body>
 </html>
