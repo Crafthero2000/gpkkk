@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Блокнот</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<style>
+:root {
+  --bg: #111;
+  --fg: #eee;
+  --bar: #222;
+  --border: #333;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #fff;
+    --fg: #000;
+    --bar: #f7f7f7;
+    --border: #ccc;
+  }
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+header {
+  background: var(--bar);
+  border-bottom: 1px solid var(--border);
+  padding: calc(env(safe-area-inset-top) + 6px) 10px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+header button {
+  appearance: none;
+  background: none;
+  border: none;
+  color: var(--fg);
+  font-size: 22px;
+  line-height: 1;
+  padding: 6px 8px;
+  border-radius: 8px;
+}
+header button:active {
+  background: rgba(127,127,127,0.2);
+}
+textarea {
+  flex: 1;
+  border: none;
+  outline: none;
+  resize: none;
+  width: 100%;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 16px;
+  padding: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas;
+  line-height: 1.5;
+}
+input[type=file] { display: none; }
+
+/* --- Диалог --- */
+#dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+  z-index: 999;
+  animation: fadein .15s ease-out;
+}
+#dialog {
+  background: var(--bar);
+  color: var(--fg);
+  border-radius: 14px;
+  width: 85%;
+  max-width: 320px;
+  padding: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  border: 1px solid var(--border);
+  animation: popin .2s ease-out;
+}
+@keyframes fadein { from {opacity:0;} to {opacity:1;} }
+@keyframes popin { from {transform:scale(0.95); opacity:0;} to {transform:scale(1); opacity:1;} }
+#dialog h3 {
+  margin: 0 0 10px;
+  font-size: 17px;
+  font-weight: 600;
+  text-align: center;
+}
+#dialog input {
+  width: 100%;
+  font-size: 16px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--fg);
+}
+#dialog .buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 14px;
+}
+#dialog button {
+  font-size: 16px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+}
+#cancelBtn { background: var(--bg); color: var(--fg); }
+#confirmBtn { background: #007aff; color: #fff; }
+#confirmBtn:active { background: #0060cc; }
+</style>
+</head>
+<body>
+  <header>
+    <button id="openBtn" title="Открыть">📂</button>
+    <div style="font-weight:600">Блокнот</div>
+    <button id="saveBtn" title="Сохранить">💾</button>
+  </header>
+
+  <textarea id="text" placeholder="Введите текст..."></textarea>
+  <input type="file" id="fileInput" accept=".txt,.md,.json,.csv,.log,.ini,.html,.js,.css,.xml,.py,.c,.cpp,.ts,.go,.sh">
+
+  <!-- Диалог -->
+  <div id="dialog-backdrop">
+    <div id="dialog">
+      <h3>Сохранить файл</h3>
+      <input id="filename" type="text" value="заметка.txt" autocomplete="off">
+      <div class="buttons">
+        <button id="cancelBtn">Отмена</button>
+        <button id="confirmBtn">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+const text = document.getElementById('text');
+const fileInput = document.getElementById('fileInput');
+const openBtn = document.getElementById('openBtn');
+const saveBtn = document.getElementById('saveBtn');
+
+// диалог
+const backdrop = document.getElementById('dialog-backdrop');
+const filenameInput = document.getElementById('filename');
+const cancelBtn = document.getElementById('cancelBtn');
+const confirmBtn = document.getElementById('confirmBtn');
+
+// --- открыть файл ---
+openBtn.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const content = await file.text();
+  text.value = content;
+  fileInput.value = '';
+});
+
+// --- показать диалог ---
+saveBtn.addEventListener('click', () => {
+  filenameInput.value = 'заметка.txt';
+  backdrop.style.display = 'flex';
+  filenameInput.focus();
+  filenameInput.select();
+});
+cancelBtn.addEventListener('click', () => backdrop.style.display = 'none');
+
+// --- сохранить ---
+confirmBtn.addEventListener('click', async () => {
+  const fileName = filenameInput.value.trim() || 'заметка.txt';
+  backdrop.style.display = 'none';
+
+  const blob = new Blob([text.value], { type: 'text/plain' });
+  const file = new File([blob], fileName, { type: 'text/plain' });
+
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      // ✅ без title/text — чистое сохранение одного файла
+      await navigator.share({ files: [file] });
+    } catch (err) {
+      console.warn('share canceled', err);
+    }
+  } else {
+    alert('Системное меню «Поделиться» недоступно.');
+  }
+});
+</script>
+</body>
+</html>
