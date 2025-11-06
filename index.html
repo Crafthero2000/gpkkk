@@ -22,6 +22,12 @@
         .then(() => console.log('✅ Service Worker зарегистрирован'))
         .catch(err => console.log('⚠️ Ошибка регистрации SW:', err));
     }
+
+    Notification.requestPermission().then((result) => {
+    if (result === "granted") {
+      randomNotification();
+    }
+  });
   </script>
 </body>
 </html>
