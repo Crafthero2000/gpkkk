@@ -17,11 +17,24 @@
   <button onclick="alert('Работает!')">Нажми</button>
 
   <script>
+    let swRegistration = null;
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js')
-        .then(() => console.log('✅ Service Worker зарегистрирован'))
+        .then((reg) => {console.log('✅ Service Worker зарегистрирован'); swRegistration = reg;})
         .catch(err => console.log('⚠️ Ошибка регистрации SW:', err));
     }
+
+    function randomNotification() {
+  if (!swRegistration) return;
+  
+  const notifTitle = "Test";
+  const notifBody = `Hi, Misha!`;
+  const options = {
+    body: notifBody
+  };
+  swRegistration.showNotification(notifTitle, options);
+  setTimeout(randomNotification, 30000);
+}
 
     Notification.requestPermission().then((result) => {
     if (result === "granted") {
